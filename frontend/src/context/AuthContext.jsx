@@ -9,33 +9,51 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+
     if (!token) {
       setLoading(false);
       return;
     }
-    api('/auth/me')
+
+    api('/api/auth/me')
       .then(({ user }) => setUser(user))
-      .catch(() => localStorage.removeItem('token'))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        localStorage.removeItem('token');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const login = async (email, password) => {
-    const { user, token } = await api('/auth/login', {
+    const { user, token } = await api('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     });
+
     localStorage.setItem('token', token);
     setUser(user);
+
     return user;
   };
 
   const register = async (name, email, password, role) => {
-    const { user, token } = await api('/auth/register', {
+    const { user, token } = await api('/api/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        role,
+      }),
     });
+
     localStorage.setItem('token', token);
     setUser(user);
+
     return user;
   };
 
@@ -45,7 +63,16 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin: user?.role === 'ADMIN' }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        isAdmin: user?.role === 'ADMIN',
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
